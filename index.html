@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>My Test</title>
+    <script src="https://rawgit.com/allensarkisyan/VideoFrame/master/VideoFrame.min.js"></script>
+</head>
+
+<body>
+    <h1>Hello my test</h1>
+    <device type="media" onchange="update(this.data)"></device>
+    <video autoplay id="video"></video>
+    <canvas style="display:none;" id="preview"></canvas>
+    <img id="play">
+    <script>
+        
+
+    </script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io();
+        const constraints = {
+            video: true,
+        };
+
+        var canvas = document.getElementById("preview");
+        var context = canvas.getContext('2d');
+        canvas.width = 900;
+        canvas.height = 700;
+    
+        context.width = canvas.width;
+        context.height = canvas.height;
+
+        const video = document.querySelector("video");
+       
+
+        navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+            video.srcObject = stream;
+            //socket.emit('stream',stream);
+        });
+
+        function Draw(video,context){
+            context.drawImage(video,0,0,context.width,context.height);
+            socket.emit('stream',canvas.toDataURL('image/webp'));
+        }
+
+        setInterval(function(){
+            Draw(video,context);
+        },0.1);
+
+        socket.on('player',function(image){
+                $('#play').attr('src',image);
+                //$('#log').text(image);
+            });
+        
+    </script>
+</body>
+
+</html>

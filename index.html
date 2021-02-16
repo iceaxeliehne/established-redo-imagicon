@@ -3,56 +3,117 @@
 
 <head>
     <title>My Test</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://rawgit.com/allensarkisyan/VideoFrame/master/VideoFrame.min.js"></script>
 </head>
 
 <body>
     <h1>Hello my test</h1>
     <device type="media" onchange="update(this.data)"></device>
-    <video autoplay id="video"></video>
+    <video autoplay style="display:none;" id="video"></video>
     <canvas style="display:none;" id="preview"></canvas>
+    <div id="logger"></div>
+    <!-- <canvas id="preview"></canvas> -->
     <img id="play">
     <script>
-        
+
 
     </script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
+        var canvas = document.getElementById("preview");
+        var context = canvas.getContext("2d");
+
+        canvas.width = 320;
+        canvas.height = 240;
+
+        context.width = canvas.width;
+        context.height = canvas.height;
+
+        var video = document.getElementById("video");
+        var img = document.getElementById("play");
         var socket = io();
         const constraints = {
             video: true,
         };
 
-        var canvas = document.getElementById("preview");
-        var context = canvas.getContext('2d');
-        canvas.width = 900;
-        canvas.height = 700;
-    
-        context.width = canvas.width;
-        context.height = canvas.height;
-
-        const video = document.querySelector("video");
-       
-
-        navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
-            video.srcObject = stream;
-            //socket.emit('stream',stream);
+        socket.on('player', function (image) {
+            console.log("player recieved");
+            img.src = image;
+            //$('#log').text(image);
         });
 
-        function Draw(video,context){
-            context.drawImage(video,0,0,context.width,context.height);
-            socket.emit('stream',canvas.toDataURL('image/webp'));
+        function logger(msg) {
+            $("#logger").text(msg);
         }
 
-        setInterval(function(){
-            Draw(video,context);
-        },0.1);
+        function loadCam(stream) {
+            video.src = window.URL.createObjectURL(stream);
+            logger('camara cargada correctamente [OK]');
+        }
 
-        socket.on('player',function(image){
-                $('#play').attr('src',image);
-                //$('#log').text(image);
+        function loadFail() {
+            logger('Camara no encontrada, revise la camara');
+        }
+
+        function viewVideo(video, context) {
+            context.drawImage(video, 0, 0, context.width, context.height);
+            
+            socket.emit('myStream', canvas.toDataURL('image/webp'));
+        }
+
+        $(function () {
+            // navigator.getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msgGetUserMedia);
+            // if (navigator.getUserMedia) {
+            //     navigator.getUserMedia({ video: true }, loadCam, loadFail);
+            // }
+            navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+                video.srcObject = stream;
             });
+            setInterval(function () {
+                viewVideo(video, context);
+            }, 120);
+        });
+
         
+
+
+
+
+        // var socket = io();
+        // const constraints = {
+        //     video: true,
+        // };
+
+        // var canvas = document.getElementById("preview");
+        // var context = canvas.getContext('2d');
+        // canvas.width = 900;
+        // canvas.height = 700;
+
+        // context.width = canvas.width;
+        // context.height = canvas.height;
+
+        // const video = document.querySelector("video");
+
+
+        // navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+        //     video.srcObject = stream;
+        //     //socket.emit('stream',stream);
+        //     setInterval(function(){
+        //         Draw(video,context,socket);
+        //     },0.1);
+        // });
+
+        // function Draw(video,context,socket){
+        //     context.drawImage(video,0,0,context.width,context.height);
+        //     console.log('frame draw');
+        //     socket.emit('myStream',canvas.toDataURL('image/webp'));
+        // }
+
+
+
+
+
     </script>
 </body>
 

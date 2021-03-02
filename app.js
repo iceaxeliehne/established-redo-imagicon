@@ -8,6 +8,8 @@ const { createCanvas, loadImage, Image } = require('canvas')
 const canvas = createCanvas(320, 240)
 const ctx = canvas.getContext('2d')
 
+const tf = require('@tensorflow/tfjs-node');
+
 ctx.width = canvas.width;
 ctx.height = canvas.height;
 
@@ -25,9 +27,11 @@ io.on('connection', (socket) => {
     socket.on('myStream', (data) => {
         frameCount++;
         console.log('frames recieved ', frameCount);
+        
         //console.log(typeof(data));
         var image = new Image();
         image.src = data;
+
         ctx.drawImage(image, 0, 0, ctx.width, ctx.height);
         // Write "Awesome!"
         ctx.font = '30px Impact'

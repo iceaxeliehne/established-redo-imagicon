@@ -2,6 +2,7 @@ const express = require('express')
 var app = express();
 var server = app.listen(3000);
 var io = require('socket.io')(server);
+//var tracking = require('tracking');
 
 const { createCanvas, loadImage, Image } = require('canvas')
 const canvas = createCanvas(320, 240)
@@ -30,8 +31,15 @@ io.on('connection', (socket) => {
         ctx.drawImage(image, 0, 0, ctx.width, ctx.height);
         // Write "Awesome!"
         ctx.font = '30px Impact'
-        ctx.rotate(0.1)
+        //ctx.rotate(0.1)
         ctx.fillText('Awesome!', 50, 100)
+        // Draw line under text
+        var text = ctx.measureText('Awesome!')
+        ctx.strokeStyle = 'rgba(0,0,0,0.5)'
+        ctx.beginPath()
+        ctx.lineTo(50, 102)
+        ctx.lineTo(50 + text.width, 102)
+        ctx.stroke()
 
         //socket.emit('player',data);
         socket.emit('player', canvas.toDataURL('image/webp'));
